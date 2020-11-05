@@ -78,6 +78,6 @@ class Numberofpath {
         // Write an answer using System.out.println()
         // To debug: System.err.println("Debug messages...")
         System.err.println("Total numbers of roads to get to Rome are :");
-        System.out.println(nbOfPaths(matrix));
+        System.out.println(totalPath(matrix));
     }
 }
