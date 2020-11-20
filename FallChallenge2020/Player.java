@@ -21,73 +21,152 @@ bestRecipe:
  **/
 class Player {
 
-   static class Spell {
-        private int actionId;
-        private int[] itemList;
-
-        public Spell() {
-            this.actionId = 0;
-            this.itemList = new int[3];
-        }
-
-        public Spell(final int actionId,final int d0,final int d1,final int d2,final int d3) {
-            this.actionId = actionId;
-            this.itemList = new int[]{d0, d1, d2, d3};
-        }
-
-        public int getSpellId() { return this.actionId; }
-        public int[] getSpellCost(){ return this.itemList; }
-
-    }
-
-    static class Inventory {
-        private int[] itemList;
-
-        public Inventory() {
-            this.itemList = new int[3];
-        }
-
-        public Inventory(final int inv0,final int inv1,final int inv2,final int inv3) {
-            this.itemList = new int[]{inv0,inv1, inv2, inv3};
-        }
-
-        public int[] getInventoryState(){ return this.itemList; }
-        public boolean isInventoryFull(){
-            int tmp = 0;
-            for (int i=0;i<itemList.length-1;i++){
-                tmp = tmp + itemList[i];
-                if (tmp==10){
-                    return true;
+    // méthode qui renvoit l'id d'un spell si les ressources nécessaires à sa réalisation sont en inventaire
+    public static int spellLauncher(int[][] spellbook, int[] inventory){
+        int[][] tmpSpellArray = spellbook;
+        int[] tmpArray = inventory;
+        int store = -1;
+        for (int row = 0; row<tmpSpellArray.length;row++){
+            for (int col = 0; col<tmpSpellArray[row].length;col++){
+                if (spellCanLaunch(tmpSpellArray[row], tmpArray)){
+                    store = tmpSpellArray[row][0];
+                }
+                if(inventoryMayBeFull(tmpArray, tmpSpellArray[row])){
+                    store = -1;
                 }
             }
-
-            return false;
-
+        }
+        return store;
     }
 
-    /*static boolean inventory(int inv0, int inv1, int inv2, int inv3){
-        if (inv0 + inv1 + inv2 + inv3 <= 10){
-            return true;
+    // méthode qui regarde si l'inventaire dispose des ressources nécessaires à la réalisation d'un spell 
+    public static boolean spellCanLaunch(int[] spell, int[] inventory){
+        int[] tmpInv = inventory;
+        int[] tmpSpell = spell;
+        boolean check = false;
+        for (int i=0; i<tmpInv.length;i++){
+            if(tmpInv[i]>=tmpSpell[i+1]){
+                check = true;
+            }
+            else{
+                check = false;
+            }
+        }
+        return check;
+    }
+    
+    //méthode qui regarde si on a encore des spell castable
+    public static boolean someSpellAreCastable(int[][] spellbook){
+        int[][] tmpSpellArray = spellbook;
+        int tmpSpellUsed = 0;
+        for (int row = 0; row<tmpSpellArray.length;row++){
+            for (int col = 0; col<tmpSpellArray[row].length;col++){
+                if (tmpSpellArray[row][5] == 0){
+                    tmpSpellUsed = tmpSpellUsed+1;
+                }
+                if(tmpSpellUsed == tmpSpellArray.length){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // méthode qui regarde si l'inventaire dispose des ressources nécessaires à la réalisation d'un recipe
+    public static boolean recipeCanLaunch(int[] recipe, int[] inventory){
+        int[] tmpInv = inventory;
+        int[] tmpRecipe = recipe;
+        boolean check = false;
+        for (int i=0; i<tmpInv.length;i++){
+            if(tmpInv[i]+tmpRecipe[i+1]>=0){
+                check = true;
+            }
+            else{
+                check = false;
+            }
+        }
+        return check;
+    }
+
+    //methode qui regarde quelle Recipe peut-être crée à partir du RecipeBook et de l'inventaire
+    //si possible le plus haut prix est selectionné
+    public static int recipeLauncher(int[][] recipebook, int[] inventory){
+        int[][] tmpRecipeArray = recipebook;
+        int[] tmpArray = inventory;
+        int store = -1;
+        int maxPrice = 0;
+        for (int row = 0; row<tmpRecipeArray.length;row++){
+            for (int col = 0; col<tmpRecipeArray[row].length;col++){
+                if (recipeCanLaunch(tmpRecipeArray[row], tmpArray)){
+                    if (tmpRecipeArray[row][5]>=maxPrice){
+                        store = tmpRecipeArray[row][0];
+                    }
+                }
+            }
+        }
+        return store;
+    }
+
+    //méthode qui remplit le livre de Spell 
+    public static int[] fillSpellBook(int actionId, int d0, int d1, int d2, int d3, int castable){
+        int[] tmpArray = {actionId, d0, d1, d2, d3, castable};
+        return tmpArray;
+    }
+
+    //méthode qui remplit le livre de Recipes 
+    public static int[] fillRecipeBook(int actionId, int d0, int d1, int d2, int d3, int price){
+        int[] tmpArray = {actionId, d0, d1, d2, d3, price};
+        return tmpArray;
+    }
+
+    //méthode qui remplit l'inventaire
+    public static int[] fillInventory(int inv0, int inv1, int inv2, int inv3){
+        int[] tmpArray = {inv0, inv1, inv2, inv3};
+        return tmpArray;
+    }
+
+    //méthode qui regarde si l'inventaire est plein 
+    public static boolean isInventoryFull(int[] inventory){
+        int tmp = 0;
+        for (int i=0;i<inventory.length-1;i++){
+            tmp = tmp + inventory[i];
+            if (tmp==10){
+                return true;
+            }
         }
 
         return false;
-    }*/
-    
-    /*static int bestRecipe(){
 
-    }*/
+    }
 
+    //méthode qui regarde si le cast d'une spell ne risque pas de faire déborder l'inventaire 
+    public static boolean inventoryMayBeFull(int[] inventory, int[] spell){
+        int sumSpell = 0;
+        int sumInv = 0;
+        for (int j=1;j<spell.length-1;j++){
+            sumSpell = sumSpell + spell[j];
+        }
+        for (int i=0;i<inventory.length;i++){
+            sumInv = sumInv + inventory[i];
+        }
+
+        if (sumSpell+sumInv>=10){
+            return true;
+        }
+        return false;
+
+    }
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
-        Spell sp0 =  new Spell(); 
-        Spell sp1 =  new Spell();
-        Spell sp2 =  new Spell();
-        Spell sp3 =  new Spell();
-        Inventory masterInv = new Inventory();
+        int[] inv = new int[3];
+        int[][] spellBook = new int[20][];
+        int[][] recipeBook = new int[20][];
         int id = 0;
-        int high_price = 0;
-        Boolean resetSpell = false;
+        String actionToDo = "REST";
+        int castableInt = 0;
+        Boolean spellToUse = true;
+        Boolean inventoryFull = false;
         // game loop
         while (true) {
             int actionCount = in.nextInt(); // the number of spells and recipes in play
@@ -103,45 +182,52 @@ class Player {
                 int taxCount = in.nextInt(); // in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell; For brews, this is how many times you can still gain an urgency bonus
                 boolean castable = in.nextInt() != 0; // in the first league: always 0; later: 1 if this is a castable player spell
                 boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
+                if (castable){
+                    castableInt = 1;
+                }
                 if (actionType.equals("CAST")){
-                    sp0 = new Spell(actionId, d0, d1, d2, d3);
-                    if (sp0.getSpellId()!=0 && sp1.getSpellId()!=0 && sp2.getSpellId()!=0){
-                        sp3 = new Spell(actionId, d0, d1, d2, d3);
-                    }
-                    else if(sp0.getSpellId()!=0 && sp1.getSpellId()!=0){
-                        sp2 = new Spell(actionId, d0, d1, d2, d3);
-                    }
-                    else{
-                        sp1 = new Spell(actionId, d0, d1, d2, d3);
-                    }
+                    spellBook[i] = fillSpellBook(actionId, d0, d1, d2, d3, castableInt);
+                }
+                if (actionType.equals("BREW")){
+                    recipeBook[i] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
                 }
             }
-            
             for (int i = 0; i < 2; i++) {
                 int inv0 = in.nextInt(); // tier-0 ingredients in inventory
                 int inv1 = in.nextInt();
                 int inv2 = in.nextInt();
                 int inv3 = in.nextInt();
                 int score = in.nextInt(); // amount of rupees
-                masterInv = new Inventory(inv0, inv1, inv2, inv3);
+                inv = fillInventory(inv0, inv1, inv2, inv3);
+                inventoryFull = isInventoryFull(inv);
             }
 
-            /*reste à faire un array des recipes*/
-            /*le but est remplir l'inventaire, regarde si on peut faire des potions, 
-                si oui on la fait, sinon on continue a cast*/ 
-
-            /* si je trouve une potion qui correspond à une combinaison dans mon inventaire je la fais*/
-
-            if(resetSpell){
-                System.out.println("REST");
-            }
-            else{
-                System.out.println("CAST " + sp1.getSpellId());
+            //si l'inventaire est plein, on essaye de lancer une recette, si aucune recette n'est réalisable, on lance à nouveau un spell
+            if(inventoryFull){
+                id = recipeLauncher(recipeBook, inv);
+                actionToDo = "BREW";
+                if (id==-1){
+                    id = spellLauncher(spellBook, inv);
+                     actionToDo = "CAST";
+                }
+                System.out.println(actionToDo + id);            
             }
 
-            if(masterInv.isInventoryFull()){
-                System.out.println("BREW " + sp1.getSpellId());
+            spellToUse = someSpellAreCastable(spellBook);
+            //si l'inventaire est plein, on essaye de lancer une recette, si aucune recette n'est réalisable, on lance à nouveau un spell
+            if(spellToUse){
+                id = spellLauncher(spellBook, inv);
+                actionToDo = "CAST";
+                if (id==-1){
+                    actionToDo = "REST";
+                }
+                System.out.println(actionToDo + id);            
             }
+
+            
+
+            
+            System.out.println("REST");
 
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
@@ -150,4 +236,4 @@ class Player {
             
         }
     }
-}}
+}
