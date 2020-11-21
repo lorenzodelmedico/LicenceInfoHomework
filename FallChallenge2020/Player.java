@@ -70,6 +70,37 @@ class Player {
     // reste à faire => ressources nécessaires à la best Recipe puis spell nécessaires à la best recipe;
     
 
+    public static int[] ressourceRequired(int idrecipe, int recipeBook[][], int inventory[], int recipecount){
+        int[] resRequired = new int [4];
+        for (int row = 0; row<recipecount;row++){
+            if (recipeBook[row][0] == idrecipe){
+                for(int j=0; j<inventory.length;j++){
+                    resRequired[j] = inventory[j]+recipeBook[row][j+1];
+                }
+            }
+        }
+        return resRequired;
+    }
+
+    public static int[][] SpellRequired(int[] resRequired, int[][]spellBook, int spellcount){
+        int[][] spellReq = new int[spellcount][];
+        int tmpSum=-1;
+        int tmpcount=0;
+        for (int row=0; row<spellcount; row++){
+            for (int j=0; j<resRequired[j];j++){
+                if (spellBook[row][j+1]+resRequired[j]>resRequired[j]){
+                    while(tmpSum!=0){
+                        tmpSum = spellBook[row][j+1]+resRequired[j];
+                        tmpcount = tmpcount +1;
+                    }
+                    spellReq[row][0] = spellBook[row][0];
+                    spellBook[row][1] = tmpcount;
+                }
+            }
+        }
+        return spellReq;
+    }
+
     // méthode qui renvoit l'id d'un spell si les ressources nécessaires à sa réalisation sont en inventaire
     public static int spellLauncher(int[][] spellbook, int[] inventory, int spellcount){
         int[][] tmpSpellArray = spellbook;

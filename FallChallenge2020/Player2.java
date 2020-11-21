@@ -22,64 +22,129 @@ bestRecipe:
 class Player2 {
 
     // méthode qui renvoit l'id d'un spell si les ressources nécessaires à sa réalisation sont en inventaire
-    public static int spellLauncher(int[][] spellbook, int[] inventory, int spellcount){
+    public static int spellLauncher(int[][] spellbook, int[] inventory, int inventorystate){
         int[][] tmpSpellArray = spellbook;
         int[] tmpArray = inventory;
         int store = -2;
         boolean check = false;
-        for (int row = 0; row<spellcount-1;row++){
-            for (int col = 0; col<tmpSpellArray[row].length-2;col++){
-                check = spellCanLaunch(tmpSpellArray[row], tmpArray);
-                if (tmpSpellArray[row][5] == 1 && check){
-                    return store = tmpSpellArray[row][0];
-                }
+        for (int row = 0; row<tmpSpellArray.length;row++){
+            check = spellCanLaunch(tmpSpellArray[row], tmpArray, inventorystate);
+            if (tmpSpellArray[row][5]==1 && check){
+                return store = tmpSpellArray[row][0];
             }
         }
         return store;
     }
 
-    public static boolean spellCanLaunch(int[] spell, int[] inventory){
+    public static boolean spellCanLaunch(int[] spell, int[] inventory, int inventorystate){
         int[] tmpInv = inventory;
         int[] tmpSpell = spell;
-        boolean check = false;
-        int sumSpell = 0;
-        int sumInv = 0;
-        for (int i=0; i<tmpInv.length;i++){
-            sumSpell = sumSpell + tmpSpell[i+1];
-            sumInv = sumInv + tmpInv[i];
-            if(tmpInv[i]>=tmpSpell[i+1]){
-                check = true;
-            }
-            else if(sumSpell+sumInv>=10){
-                return false;
-            }
-            else{
-                check = false;
+        boolean canLaunch = false;
+        if (inventorystate==10){
+            for (int i=0; i<tmpInv.length;i++){
+                //test si la spell ne rapporte pas de 2 ou plus d'un même ressource
+                if(tmpSpell[i+1]>=2){
+                    canLaunch = false;
+                    return canLaunch;
+                }
+                // int[]inventory={4,3,1,2};
+                // int[] spellSolo = {55,-1,0,0,1,0};
+                //test pour voir si la spell retire ou ne rapporte rien de la ressource
+                if(tmpSpell[i+1]<=0){
+                    continue;
+                }
+                //test si je ne dispose pas de 2 ou plus de la ressource
+                if(tmpInv[i]>=2){
+                    canLaunch = false;
+                    return canLaunch;
+                }
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    canLaunch = true;
+                }
             }
         }
-        return check;
+        if (inventorystate>6){
+            for (int i=0; i<tmpInv.length;i++){
+                //test si la spell ne rapporte pas 2fois la même ressource ou que inv ne dispose pas de 4 ou plus de la ressource
+                if(tmpSpell[i+1]>=2){
+                    canLaunch = false;
+                    return canLaunch;
+                }
+                //test pour voir si la spell retire ou ne rapporte rien de la ressource
+                if(tmpSpell[i+1]<=0){
+                    continue;
+                }
+                //test si je ne dispose pas de 3 ou plus de la ressource
+                if(tmpInv[i]>=3){
+                    canLaunch = false;
+                    return canLaunch;
+                } 
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    return canLaunch = true;
+                }  
+                  
+                   
+            }
+        }
+        /*if (inventorystate>=5){
+            for (int i=0; i<tmpInv.length;i++){
+                //test si la spell ne rapporte pas 2fois la même ressource 
+                if(tmpSpell[i+1]>=2){
+                    canLaunch = false;
+                    return canLaunch;
+                }
+                //test pour voir si la spell retire ou ne rapporte rien de la ressource
+                if(tmpSpell[i+1]<=0){
+                    continue;
+                }
+                //test si je ne dispose pas de 4 ou plus de la ressource
+                if(tmpInv[i]>=4){
+                    canLaunch = false;
+                    return canLaunch;
+                }
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    canLaunch = true;
+                }
+                
+            }
+        }*/
+        else{
+            for (int i=0; i<tmpInv.length;i++){
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    System.err.println(tmpSpell[i+1]+tmpInv[i]);
+                    canLaunch = true;
+                }
+                else{
+                    System.err.println(tmpSpell[i+1]+tmpInv[i]);
+                    return canLaunch = false;
+                }
+            }
+        }
+        return canLaunch;
     }
 
     //methode qui renvoit l'id d'une Recipe si elle peut-être créee
-    public static int recipeLauncher(int[][] recipebook, int[] inventory, int recipecount){
+    public static int recipeLauncher(int[][] recipebook, int[] inventory){
         int[][] tmpRecipeArray = recipebook;
         int[] tmpArray = inventory;
         int store = -1;
-        boolean check = false;
-        for (int row = 0; row<recipecount-1;row++){
+        for (int row = 0; row<recipebook.length;row++){
 
             for (int col = 0; col<tmpRecipeArray[row].length-2;col++){
-
                 if (tmpRecipeArray[row][col+1]+tmpArray[col]>=0) 
                 {
-                    check = true;
                     store = tmpRecipeArray[row][0];
                 }
                 else{
-                    return store = -1;
+                    store = -1;
+                    break;
                 }
             }
-            if (check){
+            if (store!=-1){
                 return store;
             }
         }
@@ -115,11 +180,13 @@ class Player2 {
         while (true) {
             int actionCount = in.nextInt(); // the number of spells and recipes in play
             int castCount = 0;
-            int recipeCount = 0;
             int castableInt = 0;
+            int recipecount = 0;
+            int castcount = 0;
+            int inventoryState = 0;
             int[] inv = new int[3];
-            int[][] spellBook = new int[actionCount][5];
-            int[][] recipeBook = new int[actionCount][5];
+            int[][] spellBook = new int[4][];
+            int[][] recipeBook = new int[5][];
             for (int i = 0; i < actionCount; i++) {
                 int actionId = in.nextInt(); // the unique ID of this spell or recipe
                 String actionType = in.next(); // in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
@@ -134,10 +201,13 @@ class Player2 {
                 boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
                 if (castable){
                     castableInt = 1;
-                }    
+                }
+                else if(!castable){
+                    castableInt = 0;
+                }
                 if (actionType.equals("BREW")){ 
-                    recipeBook[recipeCount] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
-                    recipeCount = recipeCount+1;
+                    recipeBook[recipecount] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
+                    recipecount = recipecount + 1;
                 }
                 if (actionType.equals("CAST")){
                     spellBook[castCount] = fillSpellBook(actionId, d0, d1, d2, d3, castableInt);
@@ -152,17 +222,16 @@ class Player2 {
                 int score = in.nextInt(); // amount of rupees
                 if (i==0){
                     inv = fillInventory(inv0, inv1, inv2, inv3);
-                    if(inv0+inv1+inv2+inv3==10){
-                        inventoryFull = true;
-                    }
+                    inventoryState = inv0+inv1+inv2+inv3;
                 }
+                
                 
             }
 
-            id = recipeLauncher(recipeBook, inv, recipeCount);
+            id = recipeLauncher(recipeBook, inv);
             actionToDo = "BREW ";
             if (id == -1){
-                id = spellLauncher(spellBook, inv, castCount);
+                id = spellLauncher(spellBook, inv, inventoryState);
                 actionToDo = "CAST ";
             }
             if (id == -2){
@@ -171,8 +240,7 @@ class Player2 {
             }
             if (id!= -1 && id!=-2){
                 System.out.println(actionToDo + id);
-            }
-            System.out.println("REST");            
+            }            
 
             
             // Write an action using System.out.println()
