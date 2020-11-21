@@ -19,8 +19,56 @@ spell:
 bestRecipe:
     1.Regarde les ingredients dans l'inventaire, 
     2. Choisir la recette avec the best price
+    1 blue = 0.5 turn 
+    1 green = 1 turn 
+    1 orange = green + 1 turn 
+    1 yellow = orange + 1 turn 
  **/
 class Player {
+
+    //methode qui regarde la recipe la moins cher en temps et se concentre dessus
+    public static double getRecipeTime(int[] recipe){
+        double time = 0;
+        for (int row = 0; row<recipe.length;row++){
+            time = time - (recipe[row]*0.5) - (recipe[row]*1) - (recipe[row]*2) - (recipe[row]*3);
+        }
+        return time;
+    }
+
+    //methode qui appel getRecipeTime et retourne la meilleur recipe en fct de son temps puis prix 
+    public static int getRecipePriority(int[][]recipebook, int recipecount){
+        double[] time = new double[recipecount];
+        int[] price = new int[recipecount];
+        int[] bestId = new int[recipecount];
+        int[][] tmpRecipeArray = recipebook;
+        double bestTime = 10000;
+        int bestPrice = 0;
+        int bestRecipeId = 0;
+        for (int row = 0; row<recipecount-1;row++){
+            time[row] = getRecipeTime(tmpRecipeArray[row]);
+            price[row] = tmpRecipeArray[row][5];
+            bestId[row] = tmpRecipeArray[row][0];
+        }
+        for (int j = 0; j<time.length;j++){
+            if (time[j] < bestTime){
+                bestTime = time[j];
+                bestPrice = price[j];
+                bestRecipeId = bestId[j];
+            }
+            if (time[j]==bestTime){
+                if (price[j] > bestPrice){
+                    bestTime = time[j];
+                    bestPrice = price[j];
+                    bestRecipeId = bestId[j];
+                }
+            }
+        }
+
+        return bestRecipeId;
+    }
+
+    // reste à faire => ressources nécessaires à la best Recipe puis spell nécessaires à la best recipe;
+    
 
     // méthode qui renvoit l'id d'un spell si les ressources nécessaires à sa réalisation sont en inventaire
     public static int spellLauncher(int[][] spellbook, int[] inventory, int spellcount){
@@ -158,17 +206,17 @@ class Player {
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
-        int[] inv = new int[3];
         int id = 0;
         String actionToDo = "REST";
-        int castableInt = 0;
         Boolean spellToUse = true;
         Boolean inventoryFull = false;
         // game loop
         while (true) {
             int actionCount = in.nextInt(); // the number of spells and recipes in play3
             int castCount = 0;
+            int castableInt = 0;
             int recipeCount = 0;
+            int[] inv = new int[3];
             int[][] spellBook = new int[actionCount][5];
             int[][] recipeBook = new int[actionCount][5];
             System.err.println(actionCount);
@@ -186,9 +234,7 @@ class Player {
                 boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
                 if (castable){
                     castableInt = 1;
-                }
-                
-                
+                }   
                 if (actionType.equals("BREW")){ 
                     recipeBook[recipeCount] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
                     recipeCount = recipeCount+1;
@@ -198,7 +244,6 @@ class Player {
                     castCount = castCount+1;
                 }
 
-                
             }
 
             for (int i = 0; i < 2; i++) {
@@ -207,7 +252,9 @@ class Player {
                 int inv2 = in.nextInt();
                 int inv3 = in.nextInt();
                 int score = in.nextInt(); // amount of rupees
-                inv = fillInventory(inv0, inv1, inv2, inv3);
+                if (i==1){
+                    inv = fillInventory(inv0, inv1, inv2, inv3);
+                };
                 inventoryFull = isInventoryFull(inv);
             }
 
