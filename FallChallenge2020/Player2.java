@@ -40,21 +40,36 @@ class Player2 {
         int[] tmpInv = inventory;
         int[] tmpSpell = spell;
         boolean canLaunch = false;
-        if (inventorystate==10){
+        if (inventorystate>=9){
             for (int i=0; i<tmpInv.length;i++){
                 //test si la spell ne rapporte pas de 2 ou plus d'un même ressource
                 if(tmpSpell[i+1]>=2){
-                    canLaunch = false;
-                    return canLaunch;
+                    return false;
                 }
                 // int[]inventory={4,3,1,2};
                 // int[] spellSolo = {55,-1,0,0,1,0};
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    canLaunch = true;
+                }
                 //test pour voir si la spell retire ou ne rapporte rien de la ressource
                 if(tmpSpell[i+1]<=0){
                     continue;
                 }
                 //test si je ne dispose pas de 2 ou plus de la ressource
                 if(tmpInv[i]>=2){
+                    return false;
+                }
+                 
+            }
+        }
+        if (inventorystate>6){
+            for (int i=0; i<tmpInv.length;i++){
+                if(tmpInv[0]<=1 && tmpSpell[i+1]>=2){
+                    return true;
+                }
+                //test si la spell ne rapporte pas 2fois la même ressource, si on en dispose de deja 2-3 en stock
+                if(tmpSpell[i+1]>=2){
                     canLaunch = false;
                     return canLaunch;
                 }
@@ -62,29 +77,15 @@ class Player2 {
                 if(tmpSpell[i+1]+tmpInv[i]>=0){
                     canLaunch = true;
                 }
-            }
-        }
-        if (inventorystate>6){
-            for (int i=0; i<tmpInv.length;i++){
-                //test si la spell ne rapporte pas 2fois la même ressource ou que inv ne dispose pas de 4 ou plus de la ressource
-                if(tmpSpell[i+1]>=2){
-                    canLaunch = false;
-                    return canLaunch;
-                }
                 //test pour voir si la spell retire ou ne rapporte rien de la ressource
                 if(tmpSpell[i+1]<=0){
                     continue;
-                }
-                //test si je ne dispose pas de 3 ou plus de la ressource
-                if(tmpInv[i]>=3){
-                    canLaunch = false;
-                    return canLaunch;
                 } 
-                //test si inv dispose des ressources pour cast
-                if(tmpSpell[i+1]+tmpInv[i]>=0){
-                    return canLaunch = true;
-                }  
-                  
+                //test si je ne dispose pas de plus de 3 de la ressource
+                if(tmpInv[i]>=3){
+                    return false;
+                } 
+                           
                    
             }
         }
@@ -115,12 +116,10 @@ class Player2 {
             for (int i=0; i<tmpInv.length;i++){
                 //test si inv dispose des ressources pour cast
                 if(tmpSpell[i+1]+tmpInv[i]>=0){
-                    System.err.println(tmpSpell[i+1]+tmpInv[i]);
                     canLaunch = true;
                 }
                 else{
-                    System.err.println(tmpSpell[i+1]+tmpInv[i]);
-                    return canLaunch = false;
+                    return false;
                 }
             }
         }
