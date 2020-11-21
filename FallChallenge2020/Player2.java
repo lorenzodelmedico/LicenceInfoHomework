@@ -65,10 +65,12 @@ class Player2 {
         }
         if (inventorystate>6){
             for (int i=0; i<tmpInv.length;i++){
+
+                //test si on dispose de 1 ou 0 ressource bleu et que le sort +2 arrive
                 if(tmpInv[0]<=1 && tmpSpell[i+1]>=2){
                     return true;
                 }
-                //test si la spell ne rapporte pas 2fois la même ressource, si on en dispose de deja 2-3 en stock
+                //test si la spell ne rapporte pas 2fois la même ressource
                 if(tmpSpell[i+1]>=2){
                     canLaunch = false;
                     return canLaunch;
@@ -114,6 +116,12 @@ class Player2 {
         }*/
         else{
             for (int i=0; i<tmpInv.length;i++){
+                if(tmpInv[0]<3 && tmpSpell[i+1]>=2){
+                    return true;
+                }
+                if(tmpSpell[i+1]>=2){
+                    return false;
+                }
                 //test si inv dispose des ressources pour cast
                 if(tmpSpell[i+1]+tmpInv[i]>=0){
                     canLaunch = true;
