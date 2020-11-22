@@ -108,8 +108,7 @@ public class Test {
             {59,-1,1,1,0,0},
         };
         int[] spellSolo = {55,-1,0,0,1,0};
-        test = spellCanLaunch(spellSolo, inventory, 7);
-        System.out.println(test);
+        System.out.println(spellSolo[5]);
         // for(int j=0; j<spellRequire.length;j++){
         //     for(int y=0; y<spellRequire[j].length;y++){
         //         System.out.println(spellRequire[j][y]);

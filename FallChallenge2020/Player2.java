@@ -10,15 +10,12 @@ import java.math.*;
 
 
 /**
-spell:
-    1. Lancer les sort dit gratuit
-    2. Si tout les sorts sont épuisés je REST 
-    3. Si l'opponent cast ? 
 
-bestRecipe:
-    1.Regarde les ingredients dans l'inventaire, 
-    2. Choisir la recette avec the best price
+[wood1] => [bronze] code 
+
  **/
+
+
 class Player2 {
 
     // méthode qui renvoit l'id d'un spell si les ressources nécessaires à sa réalisation sont en inventaire

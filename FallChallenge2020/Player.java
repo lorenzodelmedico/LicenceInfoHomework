@@ -1,7 +1,6 @@
 import java.util.*;
 import java.io.*;
 import java.math.*;
-import java.lang.*;
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -11,183 +10,250 @@ import java.lang.*;
 
 
 /**
-spell:
-    1. Lancer les sort dit gratuit
-    2. Si tout les sorts sont épuisés je REST 
-    3. Si l'opponent cast ? 
 
-bestRecipe:
-    1.Regarde les ingredients dans l'inventaire, 
-    2. Choisir la recette avec the best price
-    1 blue = 0.5 turn 
-    1 green = 1 turn 
-    1 orange = green + 1 turn 
-    1 yellow = orange + 1 turn 
+[bronze] => trying to get silver 
+
  **/
 class Player {
 
-    //methode qui regarde la recipe la moins cher en temps et se concentre dessus
-    public static double getRecipeTime(int[] recipe){
-        double time = 0;
-        for (int row = 0; row<recipe.length;row++){
-            time = time - (recipe[row]*0.5) - (recipe[row]*1) - (recipe[row]*2) - (recipe[row]*3);
-        }
-        return time;
-    }
-
-    //methode qui appel getRecipeTime et retourne la meilleur recipe en fct de son temps puis prix 
-    public static int getRecipePriority(int[][]recipebook, int recipecount){
-        double[] time = new double[recipecount];
-        int[] price = new int[recipecount];
-        int[] bestId = new int[recipecount];
-        int[][] tmpRecipeArray = recipebook;
-        double bestTime = 10000;
-        int bestPrice = 0;
-        int bestRecipeId = 0;
-        for (int row = 0; row<recipecount-1;row++){
-            time[row] = getRecipeTime(tmpRecipeArray[row]);
-            price[row] = tmpRecipeArray[row][5];
-            bestId[row] = tmpRecipeArray[row][0];
-        }
-        for (int j = 0; j<time.length;j++){
-            if (time[j] < bestTime){
-                bestTime = time[j];
-                bestPrice = price[j];
-                bestRecipeId = bestId[j];
-            }
-            if (time[j]==bestTime){
-                if (price[j] > bestPrice){
-                    bestTime = time[j];
-                    bestPrice = price[j];
-                    bestRecipeId = bestId[j];
-                }
-            }
-        }
-
-        return bestRecipeId;
-    }
-
-    // reste à faire => ressources nécessaires à la best Recipe puis spell nécessaires à la best recipe;
-    
-
-    public static int[] ressourceRequired(int idrecipe, int recipeBook[][], int inventory[], int recipecount){
-        int[] resRequired = new int [4];
-        for (int row = 0; row<recipecount;row++){
-            if (recipeBook[row][0] == idrecipe){
-                for(int j=0; j<inventory.length;j++){
-                    resRequired[j] = inventory[j]+recipeBook[row][j+1];
-                }
-            }
-        }
-        return resRequired;
-    }
-
-    public static int[][] SpellRequired(int[] resRequired, int[][]spellBook, int spellcount){
-        int[][] spellReq = new int[spellcount][];
-        int tmpSum=-1;
-        int tmpcount=0;
-        for (int row=0; row<spellcount; row++){
-            for (int j=0; j<resRequired[j];j++){
-                if (spellBook[row][j+1]+resRequired[j]>resRequired[j]){
-                    while(tmpSum!=0){
-                        tmpSum = spellBook[row][j+1]+resRequired[j];
-                        tmpcount = tmpcount +1;
-                    }
-                    spellReq[row][0] = spellBook[row][0];
-                    spellBook[row][1] = tmpcount;
-                }
-            }
-        }
-        return spellReq;
-    }
-
     // méthode qui renvoit l'id d'un spell si les ressources nécessaires à sa réalisation sont en inventaire
-    public static int spellLauncher(int[][] spellbook, int[] inventory, int spellcount){
-        int[][] tmpSpellArray = spellbook;
+    public static int spellLauncher(int[][] spellbooksort, int[] inventory, int inventorystate){
+        int[][] tmpSpellArray = spellbooksort;
         int[] tmpArray = inventory;
-        int store = -1;
-        for (int row = 0; row<spellcount-1;row++){
-            for (int col = 0; col<tmpSpellArray[row].length;col++){
-                if (spellCanLaunch(tmpSpellArray[row], tmpArray)){
-                    store = tmpSpellArray[row][0];
-                }
-                if(inventoryMayBeFull(tmpArray, tmpSpellArray[row])){
-                    store = -1;
-                }
+        int store = -2;
+        int tmpTime = 0;
+        boolean check = false;
+        for (int row = 0; row<tmpSpellArray.length;row++){
+            if (tmpSpellArray[row][6]!=0){
+                tmpTime = tmpSpellArray[row][6];
+            }
+            check = canLaunchBestSpell(tmpSpellArray[row], tmpArray, inventorystate, tmpTime);
+            if (tmpSpellArray[row][5]==1 && check){
+                return store = tmpSpellArray[row][0];
             }
         }
         return store;
     }
 
-    // méthode qui regarde si l'inventaire dispose des ressources nécessaires à la réalisation d'un spell 
-    public static boolean spellCanLaunch(int[] spell, int[] inventory){
+    public static boolean canLaunchBestSpell(int[] spell, int[] inventory, int inventorystate, int times){
         int[] tmpInv = inventory;
         int[] tmpSpell = spell;
-        boolean check = false;
-        for (int i=0; i<tmpInv.length;i++){
-            if(tmpInv[i]>=tmpSpell[i+1]){
-                check = true;
+        int tmpCount = 0;
+        int canLaunchcompteur = 0;
+        boolean canLaunch = true;
+        if (inventorystate>=9){
+            for (int i=0; i<tmpInv.length;i++){
+                //test si le total de ressource ajoute + le total de ressource en inv ne depasse pas la limite 
+                tmpCount = tmpCount + tmpSpell[i+1];
+
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    canLaunchcompteur = canLaunchcompteur +1;
+                }
             }
-            else{
-                check = false;
+            if (tmpCount + inventorystate > 10){
+                return false;
             }
-        }
-        return check;
-    }
-    
-    //méthode qui regarde si on a encore des spell castable
-    public static boolean someSpellAreCastable(int[][] spellbook, int spellcount){
-        int[][] tmpSpellArray = spellbook;
-        int tmpSpellUsed = 0;
-        for (int row = 0; row<spellcount-1;row++){
-            if (tmpSpellArray[row][5] == 0){
-                tmpSpellUsed = tmpSpellUsed+1;
+            if (tmpSpell[6]==1 && tmpCount * times + inventorystate > 10){
+                return false;
             }
-            if (spellcount == tmpSpellUsed){
+            if (canLaunchcompteur!=4){
                 return false;
             }
         }
-        return true;
-    }
-
-    // méthode qui regarde si l'inventaire dispose des ressources nécessaires à la réalisation d'un recipe
-    public static boolean recipeCanLaunch(int[] recipe, int[] inventory){
-        int[] tmpInv = inventory;
-        int[] tmpRecipe = recipe;
-        boolean check = false;
-        for (int i=0; i<tmpInv.length;i++){
-            if(tmpInv[i]+tmpRecipe[i+1]>=0){
-                check = true;
+        if (inventorystate>6){
+            for (int i=0; i<tmpInv.length;i++){
+                //test si le total de ressource ajoute + le total de ressource en inv ne depasse pas la limite 
+                tmpCount = tmpCount + tmpSpell[i+1];
+                //test si on dispose de 1 ou 0 ressource bleu et que le sort +2 arrive
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    canLaunchcompteur = canLaunchcompteur +1;
+                }     
             }
-            else{
-                check = false;
+            if (tmpCount + inventorystate > 10){
+                return false;
+            }
+            if (tmpSpell[6]==1 && tmpCount * times + inventorystate > 10){
+                return false;
+            }
+            if (canLaunchcompteur!=4){
+                return false;
             }
         }
-        return check;
+        else{
+            for (int i=0; i<tmpInv.length;i++){
+                tmpCount = tmpCount + tmpSpell[i+1];
+                //test si inv dispose des ressources pour cast
+                if(tmpSpell[i+1]+tmpInv[i]>=0){
+                    canLaunchcompteur = canLaunchcompteur +1;
+                }
+            }
+            if (tmpCount + inventorystate > 10){
+                return false;
+            }
+            if (tmpSpell[6]==1 && tmpCount * times + inventorystate > 10){
+                return false;
+            }
+        }
+        return canLaunch;
     }
 
     //methode qui renvoit l'id d'une Recipe si elle peut-être créee
-    //si possible le plus haut prix est selectionné
-    public static int recipeLauncher(int[][] recipebook, int[] inventory, int recipecount){
+    public static int recipeLauncher(int[][] recipebook, int[] inventory){
         int[][] tmpRecipeArray = recipebook;
         int[] tmpArray = inventory;
         int store = -1;
-        int maxPrice = 0;
-        for (int row = 0; row<recipecount-1;row++){
-            for (int col = 0; col<tmpRecipeArray[row].length;col++){
-                if (recipeCanLaunch(tmpRecipeArray[row], tmpArray)){
-                    if (tmpRecipeArray[row][5]>=maxPrice){
-                        store = tmpRecipeArray[row][0];
-                    }
+        for (int row = 0; row<recipebook.length;row++){
+
+            for (int col = 0; col<tmpRecipeArray[row].length-2;col++){
+                if (tmpRecipeArray[row][col+1]+tmpArray[col]>=0) 
+                {
+                    store = tmpRecipeArray[row][0];
                 }
+                else{
+                    store = -1;
+                    break;
+                }
+            }
+            if (store!=-1){
+                return store;
             }
         }
         return store;
     }
 
-    //méthode qui remplit le livre de Spell 
-    public static int[] fillSpellBook(int actionId, int d0, int d1, int d2, int d3, int castable){
-        int[] tmpArray = {actionId, d0, d1, d2, d3, castable};
+
+    //methode qui ordonne le spellBook par bestRatio 
+    public static int[][] orderRatioArray(int[][] matcharray, int[][] spellbook){
+        int[][] tmpArray = new int[matcharray.length][3];
+        int[][] tmpSpellArray = new int[spellbook.length][7];
+        int tmpMatch = 0;
+        int compteur = 0;
+        int[] tmpMatchArray = new int[3];
+        //tant que la derniere valeur de match n'a pas été attribué a tmpArray
+        while(compteur < matcharray.length){
+            //je trie mon Array par meilleurs matchs
+            for(int row = 0; row<matcharray.length; row++){
+                if (matcharray[row][1]>tmpMatch){
+                    tmpMatch = matcharray[row][1];
+                    tmpMatchArray = matcharray[row];
+                }
+            }
+            tmpArray[compteur] = tmpMatchArray;
+            for(int row = 0; row<spellbook.length; row++){
+                if (spellbook[row][0]==tmpArray[compteur][0]){
+                    tmpMatch = matcharray[row][1];
+                    tmpSpellArray[compteur] = spellbook[row];
+                    tmpSpellArray[compteur][6] = tmpArray[compteur][3];
+                }
+            }
+        }
+        
+        return tmpSpellArray;
+    }
+
+    //methode qui regarde quel spell rapporte le plus de ressource en rapport avec la meilleure recette [0], si repeatable regarde le best times
+    public static int[][] bestMatchRatioSpellForFirst3Spell(int[][] recipebook, int[][] spellbook){
+        int[][] matchRatioArray = new int[spellbook.length][3];
+        for(int row = 0; row < spellbook.length; row++){
+            //recherche du spell qui match le mieux avec la recette [1]
+            for(int col = 1; col <spellbook[col].length-2; col++){
+                if (recipebook[0][col] + spellbook[row][col] == 0){
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                    matchRatioArray[row][2]=1;
+                }
+                //si repeatable je regarde combien je dois repeter pour avoir le meilleur match
+                else if (spellbook[row][6] == 1){
+                    for (int i=0; i<2; i++){
+                        if ((spellbook[row][col]*i) + recipebook[0][col] == 0){
+                            matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                            matchRatioArray[row][2]=i;
+                        }
+                    }
+                    for (int i=0; i<2; i++){
+                        if ( ((spellbook[row][col]*i) + recipebook[0][col] == -1) && ((spellbook[row][col]*i) + recipebook[0][col] == 1) ){
+                            matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                            matchRatioArray[row][2]=i;
+                        }
+                    }
+                }
+                else if ((recipebook[0][col] + spellbook[row][col] == -1) || (recipebook[0][col] + spellbook[row][col] == 1)){
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                    matchRatioArray[row][2]=1;
+                }
+                else if ((recipebook[0][col] + spellbook[row][col] == -2) || (recipebook[0][col] + spellbook[row][col] == 2)){
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                    matchRatioArray[row][2]=1;
+                }
+                else{
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 0;
+                    matchRatioArray[row][2]=1;
+                }
+
+            }
+        }
+
+        return matchRatioArray;
+    }
+
+     //methode qui regarde quel spell rapporte le plus de ressource en rapport avec la meilleure recette [1], si repeatable regarde le best times
+    public static int[][] bestMatchRatioSpellForLast3Spell(int[][] recipebook, int[][] spellbook){
+        int[][] matchRatioArray = new int[spellbook.length][3];
+        for(int row = 0; row < spellbook.length; row++){
+            //recherche du spell qui match le mieux avec la recette [1]
+            for(int col = 1; col <spellbook[col].length-2; col++){
+                if (recipebook[1][col] + spellbook[row][col] == 0){
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                    matchRatioArray[row][2]=1;
+                }
+                //si repeatable je regarde combien je dois repeter pour avoir le meilleur match
+                else if (spellbook[row][6] == 1){
+                    for (int i=0; i<2; i++){
+                        if ((spellbook[row][col]*i) + recipebook[1][col] == 0){
+                            matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                            matchRatioArray[row][2]=i;
+                        }
+                    }
+                    for (int i=0; i<2; i++){
+                        if ( ((spellbook[row][col]*i) + recipebook[1][col] == -1) && ((spellbook[row][col]*i) + recipebook[1][col] == 1) ){
+                            matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                            matchRatioArray[row][2]=i;
+                        }
+                    }
+                }
+                else if ((recipebook[1][col] + spellbook[row][col] == -1) || (recipebook[1][col] + spellbook[row][col] == 1)){
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                    matchRatioArray[row][2]=1;
+                }
+                else if ((recipebook[1][col] + spellbook[row][col] == -2) || (recipebook[1][col] + spellbook[row][col] == 2)){
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 10;
+                    matchRatioArray[row][2]=1;
+                }
+                else{
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 0;
+                    matchRatioArray[row][2]=1;
+                }
+
+            }
+        }
+
+        return matchRatioArray;
+    }
+    // retourne le spell a apprendre ce tour ci 
+    public static int iWantToLearnThemAll(int[] learnbook){
+        return learnbook[0];
+    }
+
+    //méthode qui remplit le livre des 4 Spell de base 
+    public static int[] fillSpellBook(int actionId, int d0, int d1, int d2, int d3, int castable, int repeatable){
+        int[] tmpArray = {actionId, d0, d1, d2, d3, castable, repeatable};
+        return tmpArray;
+    }
+
+    //méthode qui remplit le livre depuis le grimoire
+    public static int[] fillfromSpellBook(int actionId, int d0, int d1, int d2, int d3, int castable, int repeatable){
+        int[] tmpArray = {actionId, d0, d1, d2, d3, castable, repeatable};
         return tmpArray;
     }
 
@@ -203,54 +269,23 @@ class Player {
         return tmpArray;
     }
 
-    //méthode qui regarde si l'inventaire est plein 
-    public static boolean isInventoryFull(int[] inventory){
-        int tmp = 0;
-        for (int i=0;i<inventory.length-1;i++){
-            tmp = tmp + inventory[i];
-            if (tmp==10){
-                return true;
-            }
-        }
-
-        return false;
-
-    }
-
-    //méthode qui regarde si le cast d'une spell ne risque pas de faire déborder l'inventaire 
-    public static boolean inventoryMayBeFull(int[] inventory, int[] spell){
-        int sumSpell = 0;
-        int sumInv = 0;
-        for (int j=1;j<spell.length-1;j++){
-            sumSpell = sumSpell + spell[j];
-        }
-        for (int i=0;i<inventory.length;i++){
-            sumInv = sumInv + inventory[i];
-        }
-
-        if (sumSpell+sumInv>=10){
-            return true;
-        }
-        return false;
-
-    }
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
         int id = 0;
         String actionToDo = "REST";
-        Boolean spellToUse = true;
-        Boolean inventoryFull = false;
         // game loop
         while (true) {
-            int actionCount = in.nextInt(); // the number of spells and recipes in play3
+            int actionCount = in.nextInt(); // the number of spells and recipes in play
             int castCount = 0;
             int castableInt = 0;
-            int recipeCount = 0;
+            int repeatableInt = 0;
+            int inventoryState = 0;
             int[] inv = new int[3];
-            int[][] spellBook = new int[actionCount][5];
-            int[][] recipeBook = new int[actionCount][5];
-            System.err.println(actionCount);
+            int[][] emptyreference = new int[2][];
+            int[][] spellBook = new int[10][];
+            int[] learnBook = new int[6];
+            int[][] recipeBook = new int[2][];
             for (int i = 0; i < actionCount; i++) {
                 int actionId = in.nextInt(); // the unique ID of this spell or recipe
                 String actionType = in.next(); // in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
@@ -262,60 +297,71 @@ class Player {
                 int tomeIndex = in.nextInt(); // in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax; For brews, this is the value of the current urgency bonus
                 int taxCount = in.nextInt(); // in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell; For brews, this is how many times you can still gain an urgency bonus
                 boolean castable = in.nextInt() != 0; // in the first league: always 0; later: 1 if this is a castable player spell
-                boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
+                boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell  
                 if (castable){
                     castableInt = 1;
-                }   
-                if (actionType.equals("BREW")){ 
-                    recipeBook[recipeCount] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
-                    recipeCount = recipeCount+1;
+                }
+                else if(!castable){
+                    castableInt = 0;
+                }
+                if (repeatable){
+                    repeatableInt = 1;
+                }
+                else if(!repeatable){
+                    repeatableInt = 0;
+                }
+                if (actionType.equals("BREW") && tomeIndex == 3){ 
+                    recipeBook[0] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
+                }
+                else if(actionType.equals("BREW") && tomeIndex == 1 ){
+                    recipeBook[1] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
+                }  
+                else if (actionType.equals("BREW") && recipeBook.equals(emptyreference)){
+                    recipeBook[0] = fillRecipeBook(actionId, d0, d1, d2, d3, price);
                 }
                 if (actionType.equals("CAST")){
-                    spellBook[castCount] = fillSpellBook(actionId, d0, d1, d2, d3, castableInt);
+                    spellBook[castCount] = fillSpellBook(actionId, d0, d1, d2, d3, castableInt, repeatableInt);
                     castCount = castCount+1;
                 }
-
+                 if (actionType.equals("LEARN") && taxCount == 0){
+                    learnBook = fillfromSpellBook(actionId, d0, d1, d2, d3, castableInt, repeatableInt);
+                }   
             }
-
             for (int i = 0; i < 2; i++) {
                 int inv0 = in.nextInt(); // tier-0 ingredients in inventory
                 int inv1 = in.nextInt();
                 int inv2 = in.nextInt();
                 int inv3 = in.nextInt();
                 int score = in.nextInt(); // amount of rupees
-                if (i==1){
+                if (i==0){
                     inv = fillInventory(inv0, inv1, inv2, inv3);
-                };
-                inventoryFull = isInventoryFull(inv);
-            }
-
-            //si l'inventaire est plein, on essaye de lancer une recette, si aucune recette n'est réalisable, on lance à nouveau un spell
-            if(inventoryFull){
-                id = recipeLauncher(recipeBook, inv, recipeCount);
-                actionToDo = "BREW ";
-                if (id==-1){
-                    id = spellLauncher(spellBook, inv, castCount);
-                     actionToDo = "CAST ";
+                    inventoryState = inv0+inv1+inv2+inv3;
                 }
-                System.out.println(actionToDo + id);            
+                
+                
             }
 
-            spellToUse = someSpellAreCastable(spellBook, castCount);
-            //si l'inventaire est plein, on essaye de lancer une recette, si aucune recette n'est réalisable, on lance à nouveau un spell
-            if(spellToUse){
-                id = spellLauncher(spellBook, inv, castCount);
+            //tant qu'on a pas 12 spell dans le livre on apprend de nouveaux 
+            if (castCount<=12){
+                actionToDo = "LEARN ";
+                id = iWantToLearnThemAll(learnBook);
+                System.out.println(actionToDo + id);
+            }
+            id = recipeLauncher(recipeBook, inv);
+            actionToDo = "BREW ";
+            if (id == -1){
+                id = spellLauncher(spellBook, inv, inventoryState);
                 actionToDo = "CAST ";
-                if (id==-1){
-                    actionToDo = "REST ";
-                }
-                System.out.println(actionToDo + id);            
             }
+            if (id == -2){
+                actionToDo = "REST";
+                System.out.println(actionToDo);
+            }
+            if (id!= -1 && id!=-2){
+                System.out.println(actionToDo + id);
+            }            
 
             
-
-            
-            System.out.println("REST");
-
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
 
