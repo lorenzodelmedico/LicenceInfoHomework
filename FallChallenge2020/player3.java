@@ -12,7 +12,14 @@ import java.math.*;
 /**
 
 [bronze] => trying to get silver 
-[bronze] => 2nd launch code in arena => ended around '5'
+[bronze] => 2nd launch code in arena => termine 5ème
+[bronze] => le principe de la classe Player3 : 
+    On remplit le livre de spell d'un certain nb de TomeIndex == 0 
+    Une fois un palier atteint on ordonne les spells par Match, la meilleure note étant attribué au spell qui
+    me rapproche le plus de la réalisation d'une recipe
+    Si pendant la réalisation de mes spell je me rends compte qu'une recipe est réalisable, je la BREW
+    => Les points faibles : trop de random sur les recipe craft, pas assez efficient. 
+    => Si plus de temps : j'aurais probablement dû utiliser l'algorithme de dijkstra afin d'être plus efficace
 
  **/
 class Player3 {

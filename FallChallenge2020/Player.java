@@ -12,8 +12,18 @@ import java.math.*;
 /**
 
 [bronze] => trying to get silver 
-[bronze] => coudln't test this code, tried to react to opponentScore
-[bronze] => termine 187 parce que relance de mon code trop tard dans l'arène...dommage. 
+[bronze] => last Launched Code : termine 7ème [bronze]
+[bronze] => le principe de la classe Player : 
+    On remplit le livre de spell d'un certain nb de TomeIndex == 0 
+    Une fois un palier atteint on ordonne les spells par Match, la meilleure note étant attribué au spell qui
+    me rapproche le plus de la réalisation d'une recipe
+    Si pendant la réalisation de mes spell je me rends compte qu'une recipe est réalisable, je la BREW
+    Le petit plus comparé à la classe Player3 : On réagit au score de l'adversaire, s'il est supérieur au notre
+    on essaye d'être plus exigeant dans les recipes à craft.
+    Le petit plus, manque de temps pour l'ajouter => au lieu de Rest après un BREW, je Rest quand j'ai un certains nb de spell utilisée, 
+    évite d'avoir des rest avec seulement 1 cast utilisée. 
+    => Les points faibles : trop de random sur les recipe craft, pas assez efficient. 
+    => Si plus de temps : j'aurais probablement dû utiliser l'algorithme de dijkstra afin d'être plus efficace
 
  **/
 class Player {
