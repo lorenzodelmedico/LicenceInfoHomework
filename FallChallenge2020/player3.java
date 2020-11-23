@@ -12,7 +12,7 @@ import java.math.*;
 /**
 
 [bronze] => trying to get silver 
-[bronze] => 2nd launch code in arena => ended around 'time to sleep'
+[bronze] => 2nd launch code in arena => ended around '5'
 
  **/
 class Player3 {

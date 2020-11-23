@@ -12,7 +12,8 @@ import java.math.*;
 /**
 
 [bronze] => trying to get silver 
-[bronze] => launch code in arena => ended around 17th
+[bronze] => coudln't test this code, tried to react to opponentScore
+[bronze] => termine 187 parce que relance de mon code trop tard dans l'arène...dommage. 
 
  **/
 class Player {
@@ -65,13 +66,23 @@ class Player {
 
 
     //methode qui renvoit l'id d'une Recipe si elle peut-être créee
-    public static int recipeLauncher(int[][] recipebook, int[] inventory){
+    public static int recipeLauncher(int[][] recipebook, int[] inventory, int opponentScore){
         int[][] tmpRecipeArray = recipebook;
         int[] tmpArray = inventory;
         int store = -1;
         for (int row = 0; row<recipebook.length;row++){
-
+            
             for (int col = 0; col<tmpRecipeArray[row].length-2;col++){
+                if (tmpRecipeArray[row][col+1]+tmpArray[col]>=0 && opponentScore > tmpArray[4]) 
+                {
+                    if (tmpRecipeArray[row][5]<14){
+                        store = tmpRecipeArray[row][0];
+                    }
+                    else{
+                        store = -1;
+                    break;
+                    }
+                }
                 if (tmpRecipeArray[row][col+1]+tmpArray[col]>=0) 
                 {
                     store = tmpRecipeArray[row][0];
@@ -128,12 +139,21 @@ class Player {
         return tmpSpellArray;
     }
 
-    //methode qui regarde quel spell rapporte le plus de ressource en rapport avec la meilleure recette [0], si repeatable regarde le best times
+    //methode qui regarde quel spell rapporte le plus de ressource en rapport avec la meilleure recette, si repeatable regarde le best times
     public static int[][] bestMatchRatioSpellForFirst3Recipe(int[][] recipebook, int[][] spellbook){
         int[][] matchRatioArray = new int[spellbook.length][3];
+        int[][] matchRatioArray2 = new int[spellbook.length][3];
+        int[][] matchRatioArray3 = new int[spellbook.length][3];
+        int[][] matchRatioArray4 = new int[spellbook.length][3];
+        int[][] matchRatioArray5 = new int[spellbook.length][3];
+        int[][] finalMatchRatioArray = new int[spellbook.length][3];
         for(int row = 0; row < spellbook.length; row++){
             matchRatioArray[row][2]=1;
-            //recherche du spell qui match le mieux avec la recette [1]
+            matchRatioArray2[row][2]=1;
+            matchRatioArray3[row][2]=1;
+            matchRatioArray4[row][2]=1;
+            matchRatioArray5[row][2]=1;
+            //recherche du spell qui match le mieux avec la recette [0]
             for(int col = 1; col <spellbook[col].length-2; col++){
                 matchRatioArray[row][0]= spellbook[row][0];
                 if (recipebook[0][col] + spellbook[row][col] == 0){
@@ -166,9 +186,158 @@ class Player {
                 }
 
             }
-        }
+              //recherche du spell qui match le mieux avec la recette [1]
+            for(int col = 1; col <spellbook[col].length-2; col++){
+                matchRatioArray2[row][0]= spellbook[row][0];
+                if (recipebook[1][col] + spellbook[row][col] == 0){
+                    matchRatioArray2[row][1] = matchRatioArray2[row][1] + 10;
+                    matchRatioArray2[row][2]=1;
+                }
+                //si repeatable je regarde combien je dois repeter pour avoir le meilleur match
+                else if (spellbook[row][6] == 1){
+                    for (int i=0; i<2; i++){
+                        if ((spellbook[row][col]*i) + recipebook[1][col] == 0){
+                            matchRatioArray2[row][1] = matchRatioArray2[row][1] + 10;
+                            matchRatioArray2[row][2]=i;
+                        }
+                    }
+                    for (int i=0; i<2; i++){
+                        if ( ((spellbook[row][col]*i) + recipebook[1][col] == -1) && ((spellbook[row][col]*i) + recipebook[1][col] == 1) ){
+                            matchRatioArray2[row][1] = matchRatioArray2[row][1] + 9;
+                            matchRatioArray2[row][2]=i;
+                        }
+                    }
+                }
+                else if ((recipebook[1][col] + spellbook[row][col] == -1) || (recipebook[1][col] + spellbook[row][col] == 1)){
+                    matchRatioArray2[row][1] = matchRatioArray2[row][1] + 8;
+                }
+                else if ((recipebook[1][col] + spellbook[row][col] == -2) || (recipebook[1][col] + spellbook[row][col] == 2)){
+                    matchRatioArray2[row][1] = matchRatioArray2[row][1] + 7;
+                }
+                else{
+                    matchRatioArray2[row][1] = matchRatioArray2[row][1] + 0;
+                }
 
-        return matchRatioArray;
+            }  
+            //recherche du spell qui match le mieux avec la recette [2]
+            for(int col = 1; col <spellbook[col].length-2; col++){
+                matchRatioArray3[row][0]= spellbook[row][0];
+                if (recipebook[2][col] + spellbook[row][col] == 0){
+                    matchRatioArray3[row][1] = matchRatioArray3[row][1] + 10;
+                    matchRatioArray3[row][2]=1;
+                }
+                //si repeatable je regarde combien je dois repeter pour avoir le meilleur match
+                else if (spellbook[row][6] == 1){
+                    for (int i=0; i<2; i++){
+                        if ((spellbook[row][col]*i) + recipebook[2][col] == 0){
+                            matchRatioArray3[row][1] = matchRatioArray3[row][1] + 10;
+                            matchRatioArray3[row][2]=i;
+                        }
+                    }
+                    for (int i=0; i<2; i++){
+                        if ( ((spellbook[row][col]*i) + recipebook[2][col] == -1) && ((spellbook[row][col]*i) + recipebook[2][col] == 1) ){
+                            matchRatioArray3[row][1] = matchRatioArray3[row][1] + 9;
+                            matchRatioArray3[row][2]=i;
+                        }
+                    }
+                }
+                else if ((recipebook[2][col] + spellbook[row][col] == -1) || (recipebook[2][col] + spellbook[row][col] == 1)){
+                    matchRatioArray3[row][1] = matchRatioArray3[row][1] + 8;
+                }
+                else if ((recipebook[2][col] + spellbook[row][col] == -2) || (recipebook[2][col] + spellbook[row][col] == 2)){
+                    matchRatioArray3[row][1] = matchRatioArray3[row][1] + 7;
+                }
+                else{
+                    matchRatioArray3[row][1] = matchRatioArray3[row][1] + 0;
+                }
+
+            }
+              //recherche du spell qui match le mieux avec la recette [3]
+            for(int col = 1; col <spellbook[col].length-2; col++){
+                matchRatioArray5[row][0]= spellbook[row][0];
+                if (recipebook[3][col] + spellbook[row][col] == 0){
+                    matchRatioArray5[row][1] = matchRatioArray5[row][1] + 10;
+                    matchRatioArray5[row][2]=1;
+                }
+                //si repeatable je regarde combien je dois repeter pour avoir le meilleur match
+                else if (spellbook[row][6] == 1){
+                    for (int i=0; i<2; i++){
+                        if ((spellbook[row][col]*i) + recipebook[3][col] == 0){
+                            matchRatioArray5[row][1] = matchRatioArray5[row][1] + 10;
+                            matchRatioArray5[row][2]=i;
+                        }
+                    }
+                    for (int i=0; i<2; i++){
+                        if ( ((spellbook[row][col]*i) + recipebook[3][col] == -1) && ((spellbook[row][col]*i) + recipebook[3][col] == 1) ){
+                            matchRatioArray5[row][1] = matchRatioArray5[row][1] + 9;
+                            matchRatioArray5[row][2]=i;
+                        }
+                    }
+                }
+                else if ((recipebook[3][col] + spellbook[row][col] == -1) || (recipebook[3][col] + spellbook[row][col] == 1)){
+                    matchRatioArray5[row][1] = matchRatioArray5[row][1] + 8;
+                }
+                else if ((recipebook[3][col] + spellbook[row][col] == -2) || (recipebook[3][col] + spellbook[row][col] == 2)){
+                    matchRatioArray5[row][1] = matchRatioArray5[row][1] + 7;
+                }
+                else{
+                    matchRatioArray5[row][1] = matchRatioArray5[row][1] + 0;
+                }
+
+            }
+              //recherche du spell qui match le mieux avec la recette [4]
+            for(int col = 1; col <spellbook[col].length-2; col++){
+                matchRatioArray4[row][0]= spellbook[row][0];
+                if (recipebook[4][col] + spellbook[row][col] == 0){
+                    matchRatioArray4[row][1] = matchRatioArray4[row][1] + 10;
+                    matchRatioArray4[row][2]=1;
+                }
+                //si repeatable je regarde combien je dois repeter pour avoir le meilleur match
+                else if (spellbook[row][6] == 1){
+                    for (int i=0; i<2; i++){
+                        if ((spellbook[row][col]*i) + recipebook[4][col] == 0){
+                            matchRatioArray4[row][1] = matchRatioArray4[row][1] + 10;
+                            matchRatioArray4[row][2]=i;
+                        }
+                    }
+                    for (int i=0; i<2; i++){
+                        if ( ((spellbook[row][col]*i) + recipebook[4][col] == -1) && ((spellbook[row][col]*i) + recipebook[4][col] == 1) ){
+                            matchRatioArray4[row][1] = matchRatioArray4[row][1] + 9;
+                            matchRatioArray4[row][2]=i;
+                        }
+                    }
+                }
+                else if ((recipebook[4][col] + spellbook[row][col] == -1) || (recipebook[4][col] + spellbook[row][col] == 1)){
+                    matchRatioArray4[row][1] = matchRatioArray4[row][1] + 8;
+                }
+                else if ((recipebook[4][col] + spellbook[row][col] == -2) || (recipebook[4][col] + spellbook[row][col] == 2)){
+                    matchRatioArray4[row][1] = matchRatioArray4[row][1] + 7;
+                }
+                else{
+                    matchRatioArray[row][1] = matchRatioArray[row][1] + 0;
+                }
+
+            }
+        }
+        for(int row = 0; row<matchRatioArray.length ; row ++){
+            if (matchRatioArray[row][1] > matchRatioArray2[row][1]){
+                finalMatchRatioArray = matchRatioArray;
+            }
+            else{
+                finalMatchRatioArray = matchRatioArray2;
+            }
+            if (matchRatioArray3[row][1] > finalMatchRatioArray[row][1]){
+                finalMatchRatioArray = matchRatioArray3;
+            }
+            if (matchRatioArray4[row][1] > finalMatchRatioArray[row][1]){
+                finalMatchRatioArray = matchRatioArray4;
+            }
+            if (matchRatioArray5[row][1] > finalMatchRatioArray[row][1]){
+                finalMatchRatioArray = matchRatioArray5;
+            }
+            
+        }
+        return finalMatchRatioArray;
     }
     // retourne le spell a apprendre ce tour ci 
     public static int iWantToLearnThemAll(int[] learnbook){
@@ -194,8 +363,8 @@ class Player {
     }
 
     //méthode qui remplit l'inventaire
-    public static int[] fillInventory(int inv0, int inv1, int inv2, int inv3){
-        int[] tmpArray = {inv0, inv1, inv2, inv3};
+    public static int[] fillInventory(int inv0, int inv1, int inv2, int inv3, int score){
+        int[] tmpArray = {inv0, inv1, inv2, inv3, score};
         return tmpArray;
     }
 
@@ -209,6 +378,7 @@ class Player {
         while (true) {
             int actionCount = in.nextInt(); // the number of spells and recipes in play
             int id = 0;
+            int opponentScore = 0;
             int times = 0;
             int[] tmpid = new int[2];
             int castCount = 0;
@@ -265,8 +435,11 @@ class Player {
                 int inv3 = in.nextInt();
                 int score = in.nextInt(); // amount of rupees
                 if (i==0){
-                    inv = fillInventory(inv0, inv1, inv2, inv3);
+                    inv = fillInventory(inv0, inv1, inv2, inv3, score);
                     inventoryState = inv0+inv1+inv2+inv3;
+                }
+                if (i==1){
+                    opponentScore = score;
                 }
                 
                 
@@ -286,7 +459,7 @@ class Player {
                 matchBook = bestMatchRatioSpellForFirst3Recipe(recipeBook, spellBook);
                 spellBook = orderRatioArray(matchBook, spellBook);
                 if(id == 0){
-                    id = recipeLauncher(recipeBook, inv);
+                    id = recipeLauncher(recipeBook, inv, opponentScore);
                     actionToDo = "BREW ";
                 }
                 if (id == -1){
