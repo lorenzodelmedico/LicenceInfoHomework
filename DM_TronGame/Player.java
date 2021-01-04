@@ -12,91 +12,13 @@ import java.math.*;
 
     //strategie : se diriger sur la grid en tenant compte de la position des adversaires et si le chemin a deja été visité ou non 
 
-    // ranking [bronze I] : 1149 
-    //Idées pour améliorer : Implémenter l'algorithme du premier DM, en utilisant la stratégie suivante : b (le point de cible) représente la position actuelle et on simule 4 fois (une fois par position adjacente) 
-    // avec un a qui correspond à la case non occupé la plus eloigné sur le board , de chaque coin (0,0 ; 0,19 ; 29,0; 29,19 : au début)
-    // comportement espéré : on obtient sur chaque case adjacente un score , on selectionne le meilleur
+    // BestRanking [bronze I] : 11XX 
+    //Idées pour améliorer : Implémenter l'algorithme du premier DM, en utilisant la stratégie suivante : a (le point de départ) représente la position actuelle et on simule 4 fois (une fois par position adjacente) 
+    // avec un b qui correspond à la case non occupé la plus eloigné sur le board , de chaque coin (0,0 ; 0,19 ; 29,0; 29,19 : au début) => échec de l'implémentation 
+    //Idées pour améliorer 2 : implémentaton minimax/parcoursGraphe => quel regle pour les poids ? => pas pu la réaliser. 
 
 class Player {
 
-    /* Usage : Methode qui sert à afficher la Matrice pour du debug : 
-        Args : int[][] matrice : matrice à afficher
-        Body : affiche la matrice après transformation du format. 
-    */
-
-    public static void afficheMatrice(int[][] matrice)
-	{
-        // Formatage d'un affichage compréhensible de la matrice
-		for(int i = 0 ; i < matrice.length ; i++)
-		{
-			for (int j = 0 ; j < matrice[i].length ; j++)
-				System.err.format("%6d", matrice[i][j]);
-			System.err.println();
-		}
-	}
-
-    /* Usage : Methode qui configure la première ligne et colonne de la matrice, ces valeurs nous permettent de réaliser nos calculs ensuite : 
-    {
-        Args : int[][] matrice : matrice à afficher
-        Return :  int[][] matrice : matrice configurer 
-    */
-
-    public static int[][] configMatrix(int[][] matrix){
-        matrix[0][0] = 1;
-        for(int j = 1; j < matrix[0].length; j++){
-              matrix[0][j] = 1;
-        }
-        for(int i = 1; i < matrix.length; i++) {
-                matrix[i][0] = 1;
-        }
-
-        return matrix;
-    }
-
-    /* Usage : Methode qui implemente la fonction totalPath, permettant de varier les valeurs col/row et X/Y
-        Args : int[][] matrice : matrice pour le calcul ; intX, int Y : permet de modifier la part de la matrice a calculer
-        Body : on transforme une copie de la matrice afin de réaliser nos calculs
-        Return :  int qui correspond a la valeur totale de chemin entre a et b
-    */
-
-    public static String FindAwayPosition(int[][] matrix, String fixedCorner) {
-        String[] tmpStart = fixedCorner.split(",");
-        int row=Integer.parseInt(tmpStart[0]);          
-        int col=Integer.parseInt(tmpStart[1]); 
-        //recherche la première position libre dans la matrice à partir d'une position donnée. 
-        for(int i=col+1; i < col; i++) {
-            for(int j = row+1; j < row; j++) {
-                if(matrix[i][j] == 0) {
-                    return i +","+j;
-                }
-            }
-        }
-        return "0,0";
-    }
-
-    /* Usage : Methode qui calcul la distance en chemin pour se rendre d'un point a à un point b :
-        Args : int[][] matrice : matrice pour le calcul ; intX, int Y : permet de modifier la position de fin du calcul ; String start: permet de modifier la position de depart du calcul
-        Body : on transforme une copie de la matrice afin de réaliser nos calculs
-        Return :  int qui correspond a la valeur totale de chemin entre a et b
-    */
-
-    public static int totalPath(int[][] matrix, int X, int Y, String start) {
-        //calcule le nb de chemins depuis la position (i, j) jusqu'à la position du player (X,Y)
-        String[] tmpStart = start.split(",");
-         int row=Integer.parseInt(tmpStart[0]);          
-        int col=Integer.parseInt(tmpStart[1]); 
-        for(int i=col+1; i < Y; i++) {
-            for(int j = row+1; j < X; j++) {
-                if(matrix[i][j] == 1) {
-                    matrix[i][j] = 0;
-                }
-                else if(matrix[i][j] == 0) {
-                    matrix[i][j] = matrix[i][j-1] + matrix[i-1][j];
-                }
-            }
-        }
-        return matrix[X+1][Y+1];
-    }
     
     /* Usage : Sert à remplir un 2d array avec les inputs des positions des players : 
     {
@@ -118,7 +40,7 @@ class Player {
     }
     */
     public static String mooveManager(String[][] playersPosition, int currentX, int currentY, int compteur){
-        if (currentY == 0 || currentY == 20){
+        if (currentY == 0 || currentX == 0 ){
             return mooveTo(playersPosition, currentX, currentY, compteur);
         }
         else{
@@ -175,7 +97,7 @@ class Player {
             return mooveDirector(currentX, currentY, currentX, currentY+1);
         }
         positionTest = currentX + "," + (currentY-1);
-        if (canMoove(playersPosition, positionTest, compteur ) && (currentY-1>0)){
+        if (canMoove(playersPosition, positionTest, compteur ) && (currentY-1>=0)){
             return mooveDirector(currentX, currentY, currentX, currentY-1);
         }
         positionTest = (currentX - 1) + "," + currentY;
@@ -278,19 +200,9 @@ class Player {
         int turnCompteur = 0 ;
         int currentX=0;
         int currentY=0;
-        int opponentX=0;
-        int opponentY=0;
-        String positionCorners = "";
-        String[] fixedFurthestCorner = {
-            "0,0" ,
-            "0,19",
-            "29,0",
-            "29,19",
-        };
-        // Instanciation of Matrix 
-        int[][] matrix = new int[21][31];
-
+        
         // game loop
+        
         while (true) {
             int N = in.nextInt(); // total number of players (2 to 4).
             int P = in.nextInt(); // your player number (0 to 3).
@@ -304,10 +216,6 @@ class Player {
                         currentX = X0;
                         currentY = Y0;
                     }
-                    else{
-                        opponentX = X0;
-                        opponentY = Y0;
-                    }
                     positionArray[i][turnCompteur]=fillPlayerPosition(X0, Y0);
                 }
                 else{
@@ -315,66 +223,12 @@ class Player {
                         currentX = X1;
                         currentY = Y1;
                     }
-                    else{
-                        opponentX = X1;
-                        opponentY = Y1;
-                    }
                     positionArray[i][turnCompteur]=fillPlayerPosition(X1, Y1);
                 }
             }
             
-            //Matrix init 
-            for (int i = 0; i < 21; i++) {
-                for(int j = 0; j < 31; j++) {
-                    //prend la position actuelle des joueurs en jeu et indique que leur position est bloque sur le board
-                    if ( ( (i==currentY+1) && (j==currentX+1) ) || ( (i==opponentY+1) && (j==opponentX+1) ) ) {
-                        matrix[i][j] = 1 ;  
-                    }
-                    else if(matrix[i][j] == 1){
-                        matrix[i][j] = 1 ;
-                    }
-                    else{
-                        // si aucun joueur ne s'est encore rendu sur la case alors elle est libre
-                        matrix[i][j] = 0;
-                    }
-                    
-                }
-            }
-            matrix = configMatrix(matrix) ;
-            int bestPath = 0;
-            // on boucle 4 fois pour tester le nb de chemins depuis les 4 fixedCOrner. Puis on selectionne le meilleur. 
-            for (int i = 0; i<4;i++){
-                int[][] matrixRecopie = new int[21][31];
-                matrixRecopie = matrix;
-                positionCorners = FindAwayPosition(matrixRecopie, fixedFurthestCorner[i]);
-                System.err.println(positionCorners);
-                for (int j = 0; j<4; j++){
-                    // on teste les path pour les valeurs x+1, -1, y+1, -1
-                    int path = totalPath(matrixRecopie, currentX+1, currentY, positionCorners);
-                    if (path > bestPath){
-                        bestPath = path ;
-                        direction = mooveDirector(currentX, currentY, currentX+1, currentY);
-                        System.err.println(bestPath);
-                        System.err.println(direction);
-                    }
-                    path = totalPath(matrixRecopie, currentX-1, currentY, positionCorners);
-                    if (path > bestPath){
-                        bestPath = path ;
-                        direction = mooveDirector(currentX, currentY, currentX-1, currentY);
-                    }
-                    path = totalPath(matrixRecopie, currentX, currentY+1, positionCorners);
-                    if (path > bestPath){
-                        bestPath = path ;
-                        direction = mooveDirector(currentX, currentY, currentX, currentY+1); 
-                    }
-                    path = totalPath(matrixRecopie, currentX, currentY-1, positionCorners);
-                    if (path > bestPath){
-                        bestPath = path ;
-                        direction = mooveDirector(currentX, currentY, currentX, currentY-1); 
-                    }
-                }
-            }
-           
+            direction = mooveManager(positionArray, currentX, currentY, turnCompteur);
+            
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
             turnCompteur = turnCompteur + 1 ;
