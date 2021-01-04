@@ -12,10 +12,11 @@ import java.math.*;
 
     //strategie : se diriger sur la grid en tenant compte de la position des adversaires et si le chemin a deja été visité ou non 
 
-    // BestRanking [bronze I] : 11XX 
+    // ranking [bronze I] : 1149 
     //Idées pour améliorer : Implémenter l'algorithme du premier DM, en utilisant la stratégie suivante : a (le point de départ) représente la position actuelle et on simule 4 fois (une fois par position adjacente) 
-    // avec un b qui correspond à la case non occupé la plus eloigné sur le board , de chaque coin (0,0 ; 0,19 ; 29,0; 29,19 : au début) => échec de l'implémentation 
-    //Idées pour améliorer 2 : implémentaton minimax/parcoursGraphe => quel regle pour les poids ? => pas pu la réaliser. 
+    // avec un b qui correspond à la case non occupé la plus eloigné sur le board , de chaque coin (0,0 ; 0,19 ; 29,0; 29,19 : au début)
+    //Une bonne manière de tester mon algorithme est de modifier les valeurs de mooveManager ainsi que de mooveToBorder
+    //On obtient des comportements assez variées et des résultats différents 
 
 class Player {
 
@@ -40,7 +41,7 @@ class Player {
     }
     */
     public static String mooveManager(String[][] playersPosition, int currentX, int currentY, int compteur){
-        if (currentY == 0 || currentX == 0 ){
+        if (currentY == 0 || currentY == 19 ){
             return mooveTo(playersPosition, currentX, currentY, compteur);
         }
         else{
@@ -57,7 +58,7 @@ class Player {
     }
     */
     public static String mooveToBorder(String[][] playersPosition, int currentX, int currentY, int compteur){
-        if (20 - currentY > 10){
+        if (20 - currentY > 3){
             String positionTest = currentX + "," + (currentY+1);
             if (canMoove(playersPosition, positionTest, compteur )){
             return mooveDirector(currentX, currentY, currentX, currentY+1);
@@ -69,7 +70,7 @@ class Player {
             return mooveDirector(currentX, currentY, currentX, currentY-1);
         }
         }
-        if (30 - currentX>15){
+        if (30 - currentX>3){
             String positionTest = (currentX - 1) + "," + currentY;
             if (canMoove(playersPosition, positionTest, compteur)){
             return mooveDirector(currentX, currentY, currentX-1, currentY);
