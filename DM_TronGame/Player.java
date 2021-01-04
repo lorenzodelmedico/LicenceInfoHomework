@@ -12,7 +12,7 @@ import java.math.*;
 
     //debut : se diriger sur la grid en tenant compte de la position des adversaires et si le chemin a deja été visité ou non 
 
-
+    // on essaye de reagir a la pos actuelle et se diriger vers les borders pour gagner en espace 
 
 class Player {
 
@@ -23,17 +23,38 @@ class Player {
         return tmpArray;
     }
 
-
-    public static String mooveTo(String[][] playersPosition, int currentX, int currentY, int compteur){
-        String positionTest = (currentX + 1) + "," + currentY;
-        if (canMoove(playersPosition, positionTest, compteur)){
-            return mooveDirector(currentX, currentY, currentX+1, currentY);
+    public static String mooveToBorder(String[][] playersPosition, int currentX, int currentY, int compteur){
+        if (20 - currentY > 10){
+            String positionTest = currentX + "," + (currentY+1);
+            if (canMoove(playersPosition, positionTest, compteur )){
+            return mooveDirector(currentX, currentY, currentX, currentY+1);
         }
-        positionTest = (currentX - 1) + "," + currentY;
-        if (canMoove(playersPosition, positionTest, compteur)){
+        }
+        else{
+            String positionTest = currentX + "," + (currentY-1);
+            if (canMoove(playersPosition, positionTest, compteur )){
+            return mooveDirector(currentX, currentY, currentX, currentY-1);
+        }
+        }
+        if (30 - currentX>15){
+            String positionTest = (currentX - 1) + "," + currentY;
+            if (canMoove(playersPosition, positionTest, compteur)){
             return mooveDirector(currentX, currentY, currentX-1, currentY);
         }
-        positionTest = currentX + "," + (currentY+1);
+        }
+        else {
+            String positionTest = (currentX + 1) + "," + currentY;
+            if (canMoove(playersPosition, positionTest, compteur)){
+            return mooveDirector(currentX, currentY, currentX+1, currentY);
+        }
+        }
+        
+        return mooveTo(playersPosition, currentX, currentY, compteur);
+    }
+
+
+    public static String mooveTo(String[][] playersPosition, int currentX, int currentY, int compteur){
+        String positionTest = currentX + "," + (currentY+1);
         if (canMoove(playersPosition, positionTest, compteur )){
             return mooveDirector(currentX, currentY, currentX, currentY+1);
         }
@@ -41,6 +62,15 @@ class Player {
         if (canMoove(playersPosition, positionTest, compteur ) && (currentY-1>0)){
             return mooveDirector(currentX, currentY, currentX, currentY-1);
         }
+        positionTest = (currentX - 1) + "," + currentY;
+        if (canMoove(playersPosition, positionTest, compteur)){
+            return mooveDirector(currentX, currentY, currentX-1, currentY);
+        }
+        positionTest = (currentX + 1) + "," + currentY;
+        if (canMoove(playersPosition, positionTest, compteur)){
+            return mooveDirector(currentX, currentY, currentX+1, currentY);
+        }
+        
         return mooveDirector(currentX, currentY, currentX, currentY);
     }
 
@@ -74,7 +104,6 @@ class Player {
 
     public static boolean isOccupied(String[] positionArray, String position, int compteur){
         for (int i=0; i<compteur+1; i++){
-            System.err.println(positionArray[i]);
             if (positionArray[i].equals(position)){
                 return true;
             }
@@ -132,13 +161,11 @@ class Player {
                 }
             }
             
-            direction = mooveTo(positionArray, currentX, currentY, turnCompteur);
+            direction = mooveToBorder(positionArray, currentX, currentY, turnCompteur);
             
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
-            System.err.println(turnCompteur);
             turnCompteur = turnCompteur + 1 ;
-            System.err.println(turnCompteur);
             System.out.println(direction); // A single line with UP, DOWN, LEFT or RIGHT
         }
     }
