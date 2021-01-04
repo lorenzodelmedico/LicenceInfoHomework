@@ -13,7 +13,8 @@ import java.math.*;
     //strategie : se diriger sur la grid en tenant compte de la position des adversaires et si le chemin a deja été visité ou non 
 
     // ranking [bronze I] : 1149 
-    //Idées pour améliorer : 
+    //Idées pour améliorer : Implémenter l'algorithme du premier DM, en utilisant la stratégie suivante : a (le point de départ) représente la position actuelle et on simule 4 fois (une fois par position adjacente) 
+    // avec un b qui correspond à la case non occupé la plus eloigné sur le board , de chaque coin (0,0 ; 0,19 ; 29,0; 29,19 : au début)
 
 class Player {
 
