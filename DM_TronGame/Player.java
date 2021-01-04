@@ -12,7 +12,7 @@ import java.math.*;
 
     //debut : se diriger sur la grid en tenant compte de la position des adversaires et si le chemin a deja été visité ou non 
 
-    // on essaye de reagir a la pos actuelle et se diriger vers les borders pour gagner en espace 
+
 
 class Player {
 
@@ -22,6 +22,18 @@ class Player {
         String tmpArray = X0 + "," + Y0;
         return tmpArray;
     }
+
+    public static String mooveManager(String[][] playersPosition, int currentX, int currentY, int compteur){
+        if (currentY == 0 || currentY == 20){
+            return mooveTo(playersPosition, currentX, currentY, compteur);
+        }
+        else{
+            return mooveToBorder(playersPosition, currentX, currentY, compteur);
+        }
+    }
+        
+       
+
 
     public static String mooveToBorder(String[][] playersPosition, int currentX, int currentY, int compteur){
         if (20 - currentY > 10){
@@ -48,7 +60,6 @@ class Player {
             return mooveDirector(currentX, currentY, currentX+1, currentY);
         }
         }
-        
         return mooveTo(playersPosition, currentX, currentY, compteur);
     }
 
@@ -87,7 +98,7 @@ class Player {
             return "LEFT";
         }
 
-        return "RIGHT";
+        return "LEFT";
     }
 
     public static boolean canMoove(String[][] playersPosition, String position, int compteur){
@@ -161,7 +172,7 @@ class Player {
                 }
             }
             
-            direction = mooveToBorder(positionArray, currentX, currentY, turnCompteur);
+            direction = mooveManager(positionArray, currentX, currentY, turnCompteur);
             
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
